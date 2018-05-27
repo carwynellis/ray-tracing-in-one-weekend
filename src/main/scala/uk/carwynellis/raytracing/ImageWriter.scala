@@ -1,5 +1,4 @@
 package uk.carwynellis.raytracing
-import scala.collection.immutable
 
 /**
   * Initial attempt at a PPM writer from Chapter 1.
@@ -21,13 +20,15 @@ object ImageWriter extends App {
   // Write PPM data
   (ny-1 to 0 by -1) foreach { j =>
     (0 until nx) foreach { i =>
-      val r =  i.toFloat / nx
-      val g = j.toFloat / ny
-      val b = 0.2F
+      val vec = Vec3(
+        x =  i.toFloat / nx,
+        y = j.toFloat / ny,
+        z = 0.2F
+      )
 
-      val ir = (255.99*r).toInt
-      val ig = (255.99*g).toInt
-      val ib = (255.99*b).toInt
+      val ir = (255.99 * vec.x).toInt
+      val ig = (255.99 * vec.y).toInt
+      val ib = (255.99 * vec.z).toInt
 
       println(s"$ir $ig $ib")
     }
