@@ -8,8 +8,8 @@ import java.io.{File, PrintWriter}
   */
 object Render extends App {
 
-  val nx = 200
-  val ny = 100
+  val nx = 800
+  val ny = 400
 
   /**
     * Compute the color for a given ray.
@@ -18,10 +18,14 @@ object Render extends App {
     * @return
     */
   def color(r: Ray): Vec3 = {
-    if (hitSphere(Vec3(0, 0, -1), 0.5, r)) {
-      // Ray has intersected sphere so we return red for the current pixel.
-      Vec3(1, 0, 0)
+    val result = hitSphere(Vec3(0, 0, -1), 0.5, r)
+
+    // Ray intersects sphere so compute shading...
+    if (result > 0) {
+      val normal = (r.pointAtParameter(result) - Vec3(0, 0, -1)).unitVector
+      0.5 * Vec3(normal.x + 1, normal.y + 1, normal.z + 1)
     }
+    // ...otherwise continue to render background.
     else {
       val unitDirection = r.direction.unitVector
       val t = 0.5 * (unitDirection.y + 1)
@@ -29,13 +33,17 @@ object Render extends App {
     }
   }
 
-  def hitSphere(centre: Vec3, radius: Double, ray: Ray): Boolean = {
+  def hitSphere(centre: Vec3, radius: Double, ray: Ray): Double = {
     val oc = ray.origin - centre
+
     val a = ray.direction.dot(ray.direction)
     val b = 2.0 * oc.dot(ray.direction)
     val c = oc.dot(oc) - (radius * radius)
+
     val discriminant = (b * b) - (4 * a * c)
-    discriminant > 0
+
+    if (discriminant < 0) -1
+    else (-b - math.sqrt(discriminant)) / (2 * a)
   }
 
   val fileName = "image.ppm"
