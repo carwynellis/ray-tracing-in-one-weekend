@@ -18,8 +18,8 @@ object Render extends App {
     */
   def color(r: Ray): Vec3 = {
     val unitDirection = r.direction.unitVector
-    val t = 0.5 * ( unitDirection.y + 1)
-    ((1.0 - t) * Vec3(1, 1, 1)) + (t * Vec3(0.5, 0.7, 100))
+    val t = 0.5 * (unitDirection.y + 1)
+    ((1.0 - t) * Vec3(1, 1, 1)) + (t * Vec3(0.5, 0.7, 1))
   }
 
   val fileName = "image.ppm"

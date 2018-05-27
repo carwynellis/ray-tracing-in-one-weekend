@@ -2,7 +2,7 @@ package uk.carwynellis.raytracing
 
 class Ray(val origin: Vec3, val direction: Vec3) {
 
-  def pointAtParameter(t: Double) = origin + ( t * direction)
+  def pointAtParameter(t: Double) = origin + (t * direction)
 
 }
 
