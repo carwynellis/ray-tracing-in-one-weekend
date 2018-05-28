@@ -7,7 +7,7 @@ case class HitRecord(t: Double, p: Vec3, normal: Vec3)
 // TODO - better name for this trait?
 trait Hitable {
 
-  def hit(r: Ray, tMin: Double, tMax: Double, hitRecord: HitRecord): HitResult
+  def hit(r: Ray, tMin: Double, tMax: Double): HitResult
 
 }
 
@@ -18,7 +18,7 @@ class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
 
   // TODO - get some test coverage of this method
   // TODO - refactor this, it's fugly
-  override def hit(r: Ray, tMin: Double, tMax: Double, hitRecord: HitRecord): HitResult = {
+  override def hit(r: Ray, tMin: Double, tMax: Double): HitResult = {
     val oc = r.origin - centre
 
     val a = r.direction.dot(r.direction)
@@ -49,10 +49,12 @@ class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
         return HitResult(hit = true, record)
       }
 
-      HitResult(hit = false, hitRecord)
+      // TODO - make hit record optional or get rid of hit boolean altogether
+      HitResult(hit = false, HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
     }
     else {
-      HitResult(hit = false, hitRecord)
+      // TODO - make hit record optional or get rid of hit boolean altogether
+      HitResult(hit = false, HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
     }
   }
 }
@@ -63,13 +65,13 @@ object Sphere {
 
 class HitableList(val hitables: List[Hitable]) extends Hitable {
 
-  override def hit(r: Ray, tMin: Double, tMax: Double, hitRecord: HitRecord): HitResult = {
+  override def hit(r: Ray, tMin: Double, tMax: Double): HitResult = {
 
     @tailrec
     def loop(hs: List[Hitable], closest: Double, hitAnything: Boolean, record: HitRecord): HitResult = {
       hs match {
         case x :: xs =>
-          val hitResult = x.hit(r, tMin, closest, record)
+          val hitResult = x.hit(r, tMin, closest)
           if (hitResult.hit)
             loop(xs, hitResult.record.t, hitAnything = true, hitResult.record)
           else loop(xs, closest, hitAnything = hitAnything, record)
@@ -78,7 +80,7 @@ class HitableList(val hitables: List[Hitable]) extends Hitable {
       }
     }
 
-    loop(hitables, closest = tMax, hitAnything = false, hitRecord)
+    loop(hitables, closest = tMax, hitAnything = false, HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
   }
 
 }

@@ -19,7 +19,7 @@ object Render extends App {
     */
   def color(r: Ray, world: Hitable): Vec3 = {
     // TODO - do we need to pass in a HitRecord?
-    val hitResult = world.hit(r, 0.0, Double.MaxValue, HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
+    val hitResult = world.hit(r, 0.0, Double.MaxValue)
 
     // Ray has hit a hitable object...
     if (hitResult.hit) {
