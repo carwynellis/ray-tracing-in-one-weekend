@@ -30,11 +30,20 @@ class Dielectric(refractiveIndex: Double) extends Material(Vec3(1,1,1)) {
 
   override def scatter(rayIn: Ray, record: HitRecord): Ray = {
     val reflected = Material.reflect(rayIn.direction,record.normal)
-    val (outwardNormal, niOverNt) =
-      if (rayIn.direction.dot(record.normal) > 0) (-record.normal, refractiveIndex)
-      else (record.normal, 1.0 / refractiveIndex)
+
+    val (outwardNormal, niOverNt, cosine) =
+      if (rayIn.direction.dot(record.normal) > 0)
+        (-record.normal, refractiveIndex, refractiveIndex * rayIn.direction.dot(record.normal) / rayIn.direction.length)
+      else
+        (record.normal, 1.0 / refractiveIndex, -rayIn.direction.dot(record.normal) / rayIn.direction.length)
+
     val refracted = refract(rayIn.direction, outwardNormal, niOverNt)
-    if (refracted == rayIn.direction) Ray(record.p, reflected)
+
+    val reflectionProbability =
+      if (refracted == rayIn.direction) 1.0
+      else schlick(cosine)
+
+    if (math.random() < reflectionProbability) Ray(record.p, reflected)
     else Ray(record.p, refracted)
   }
 
@@ -44,5 +53,12 @@ class Dielectric(refractiveIndex: Double) extends Material(Vec3(1,1,1)) {
     val discriminant = 1.0 - (niOverNt * niOverNt * (1 - (dt * dt)))
     if (discriminant > 0) (niOverNt * (unitVectorOfV - (n * dt))) - (n * math.sqrt(discriminant))
     else v
+  }
+
+  // Polynomial approximation for glass reflectivity.
+  private def schlick(cosine: Double): Double = {
+    val r0 = (1 - refractiveIndex) / (1 + refractiveIndex)
+    val r0Squared = r0 * r0
+    r0 + (1 - r0) * math.pow((1 - cosine), 5)
   }
 }
