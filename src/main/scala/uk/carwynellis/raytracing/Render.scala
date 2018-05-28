@@ -10,20 +10,27 @@ import scala.annotation.tailrec
   */
 object Render extends App {
 
+  // When rendering some rays may may include a floating point error preventing them from being treated as 0.
+  // We increase the minimum value we accept slight which yields a smoother image without visible noise.
+  val ImageSmoothingLimit = 0.001
+
   /**
     * Compute the color for a given ray.
     *
     * @param r
     * @return
     */
-  def color(r: Ray, world: Hitable): Vec3 = {
+  def color(r: Ray, world: Hitable, depth: Int): Vec3 = {
 
-    val hitResult = world.hit(r, 0.0, Double.MaxValue)
+    val hitResult = world.hit(r, ImageSmoothingLimit, Double.MaxValue)
 
     hitResult match {
       case Some(hit) =>
-        val target = hit.p + hit.normal + Sphere.randomPointInUnitSphere()
-        0.5 * color(Ray(hit.p, target - hit.p), world)
+        if (depth < 50) {
+          val scattered = hit.material.scatter(r, hit)
+          hit.material.albedo * color(scattered, world, depth + 1)
+        }
+        else Vec3(0, 0, 0)
       case None =>
         val unitDirection = r.direction.unitVector
         val t = 0.5 * (unitDirection.y + 1)
@@ -49,7 +56,7 @@ object Render extends App {
         val xR = (x.toDouble + math.random()) / nx
         val yR = (y.toDouble + math.random()) / ny
         val ray = Camera.getRay(xR, yR)
-        loop(remaining - 1, acc + color(ray, world))
+        loop(remaining - 1, acc + color(ray, world, 0))
       }
       else acc / ns
     }
@@ -65,8 +72,10 @@ object Render extends App {
       |""".stripMargin)
 
   val world = HitableList(List(
-    Sphere(Vec3(0, 0, -1), 0.5),
-    Sphere(Vec3(0, -100.5, -1), 100)
+    Sphere(Vec3(0, 0, -1), 0.5, new Lambertian(Vec3(0.8, 0.3, 0.3))),
+    Sphere(Vec3(0, -100.5, -1), 100, new Lambertian(Vec3(0.8, 0.8, 0.80))),
+    Sphere(Vec3(1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.6, 0.2))),
+    Sphere(Vec3(-1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.8, 0.8)))
   ))
 
   // Write PPM data

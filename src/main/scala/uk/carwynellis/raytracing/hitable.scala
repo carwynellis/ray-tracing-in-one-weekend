@@ -2,7 +2,7 @@ package uk.carwynellis.raytracing
 
 import scala.annotation.tailrec
 
-case class HitRecord(t: Double, p: Vec3, normal: Vec3)
+case class HitRecord(t: Double, p: Vec3, normal: Vec3, material: Material)
 
 // TODO - better name for this trait?
 trait Hitable {
@@ -11,10 +11,7 @@ trait Hitable {
 
 }
 
-// TODO - would something like a state monad work here instead?
-case class HitResult(hit: Boolean, record: HitRecord)
-
-class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
+class Sphere(val centre: Vec3, val radius: Double, val material: Material) extends Hitable {
 
   // TODO - get some test coverage of this method
   // TODO - refactor and tidy up
@@ -34,7 +31,8 @@ class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
         val record = HitRecord(
           t = x,
           p = r.pointAtParameter(x),
-          normal = (r.pointAtParameter(x) - centre) / radius
+          normal = (r.pointAtParameter(x) - centre) / radius,
+          material = material
         )
         return Some(record)
       }
@@ -44,7 +42,8 @@ class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
         val record = HitRecord(
           t = y,
           p = r.pointAtParameter(y),
-          normal = (r.pointAtParameter(y) - centre) / radius
+          normal = (r.pointAtParameter(y) - centre) / radius,
+          material = material
         )
         return Some(record)
       }
@@ -55,7 +54,7 @@ class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
 }
 
 object Sphere {
-  def apply(centre: Vec3, radius: Double) = new Sphere(centre, radius)
+  def apply(centre: Vec3, radius: Double, material: Material) = new Sphere(centre, radius, material)
 
   @tailrec
   def randomPointInUnitSphere(): Vec3 = {
