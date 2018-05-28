@@ -7,7 +7,7 @@ case class HitRecord(t: Double, p: Vec3, normal: Vec3)
 // TODO - better name for this trait?
 trait Hitable {
 
-  def hit(r: Ray, tMin: Double, tMax: Double): HitResult
+  def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord]
 
 }
 
@@ -17,8 +17,8 @@ case class HitResult(hit: Boolean, record: HitRecord)
 class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
 
   // TODO - get some test coverage of this method
-  // TODO - refactor this, it's fugly
-  override def hit(r: Ray, tMin: Double, tMax: Double): HitResult = {
+  // TODO - refactor and tidy up
+  override def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord] = {
     val oc = r.origin - centre
 
     val a = r.direction.dot(r.direction)
@@ -36,7 +36,7 @@ class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
           p = r.pointAtParameter(x),
           normal = (r.pointAtParameter(x) - centre) / radius
         )
-        return HitResult(hit = true, record)
+        return Some(record)
       }
 
       val y = (-b + discriminantRoot) / a
@@ -46,16 +46,11 @@ class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
           p = r.pointAtParameter(y),
           normal = (r.pointAtParameter(y) - centre) / radius
         )
-        return HitResult(hit = true, record)
+        return Some(record)
       }
+    }
 
-      // TODO - make hit record optional or get rid of hit boolean altogether
-      HitResult(hit = false, HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
-    }
-    else {
-      // TODO - make hit record optional or get rid of hit boolean altogether
-      HitResult(hit = false, HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
-    }
+    None
   }
 }
 
@@ -65,22 +60,22 @@ object Sphere {
 
 class HitableList(val hitables: List[Hitable]) extends Hitable {
 
-  override def hit(r: Ray, tMin: Double, tMax: Double): HitResult = {
+  override def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord] = {
 
     @tailrec
-    def loop(hs: List[Hitable], closest: Double, hitAnything: Boolean, record: HitRecord): HitResult = {
+    def loop(hs: List[Hitable], closest: Double, hitAnything: Boolean, record: Option[HitRecord]): Option[HitRecord] = {
       hs match {
         case x :: xs =>
           val hitResult = x.hit(r, tMin, closest)
-          if (hitResult.hit)
-            loop(xs, hitResult.record.t, hitAnything = true, hitResult.record)
-          else loop(xs, closest, hitAnything = hitAnything, record)
-
-        case Nil => HitResult(hitAnything, record)
+          hitResult match {
+            case Some(updatedRecord) => loop(xs, updatedRecord.t, hitAnything = true, Some(updatedRecord))
+            case None => loop(xs, closest, hitAnything = hitAnything, record)
+          }
+        case Nil => record
       }
     }
 
-    loop(hitables, closest = tMax, hitAnything = false, HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
+    loop(hitables, closest = tMax, hitAnything = false, None)
   }
 
 }

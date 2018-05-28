@@ -18,23 +18,22 @@ object Render extends App {
     * @return
     */
   def color(r: Ray, world: Hitable): Vec3 = {
-    // TODO - do we need to pass in a HitRecord?
+
     val hitResult = world.hit(r, 0.0, Double.MaxValue)
 
-    // Ray has hit a hitable object...
-    if (hitResult.hit) {
-      0.5 * Vec3(
-        x = hitResult.record.normal.x + 1,
-        y = hitResult.record.normal.y + 1,
-        z = hitResult.record.normal.z + 1
-      )
+    hitResult match {
+      case Some(hit) =>
+        0.5 * Vec3(
+          x = hit.normal.x + 1,
+          y = hit.normal.y + 1,
+          z = hit.normal.z + 1
+        )
+      case None =>
+        val unitDirection = r.direction.unitVector
+        val t = 0.5 * (unitDirection.y + 1)
+        ((1.0 - t) * Vec3(1, 1, 1)) + (t * Vec3(0.5, 0.7, 1))
     }
-    // ...otherwise continue to render background.
-    else {
-      val unitDirection = r.direction.unitVector
-      val t = 0.5 * (unitDirection.y + 1)
-      ((1.0 - t) * Vec3(1, 1, 1)) + (t * Vec3(0.5, 0.7, 1))
-    }
+
   }
 
   val fileName = "image.ppm"

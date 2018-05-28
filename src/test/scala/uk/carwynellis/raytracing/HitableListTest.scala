@@ -5,8 +5,9 @@ import org.scalatest.{FunSuite, Matchers}
 class HitableListTest extends FunSuite with Matchers {
 
   case class DummyHitable(hit: Boolean) extends Hitable {
-    override def hit(r: Ray, tMin: Double, tMax: Double): HitResult =
-      HitResult(hit, HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
+    override def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord] =
+      if (hit) Some(HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
+      else None
   }
 
   // For now just exercise hit detection without validating closest calculations.
@@ -19,7 +20,7 @@ class HitableListTest extends FunSuite with Matchers {
       tMax = 1.0
     )
 
-    result.hit should be(false)
+    result shouldBe empty
   }
 
   test("should return hitResult with hit = true for list of hitables with one hit object") {
@@ -31,7 +32,7 @@ class HitableListTest extends FunSuite with Matchers {
       tMax = 1.0
     )
 
-    result.hit should be(true)
+    result shouldBe defined
   }
 
 }
