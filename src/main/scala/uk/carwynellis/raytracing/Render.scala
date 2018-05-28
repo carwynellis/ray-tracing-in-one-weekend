@@ -75,7 +75,7 @@ object Render extends App {
     Sphere(Vec3(0, 0, -1), 0.5, new Lambertian(Vec3(0.8, 0.3, 0.3))),
     Sphere(Vec3(0, -100.5, -1), 100, new Lambertian(Vec3(0.8, 0.8, 0.0))),
     Sphere(Vec3(1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.6, 0.2), 0.3)),
-    Sphere(Vec3(-1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.8, 0.8), 1.0))
+    Sphere(Vec3(-1, 0, -1), 0.5, new Dielectric(1.5))
   ))
 
   // Write PPM data
