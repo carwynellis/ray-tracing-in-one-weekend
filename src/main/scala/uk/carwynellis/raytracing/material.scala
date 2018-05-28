@@ -19,9 +19,9 @@ class Lambertian(albedo: Vec3) extends Material(albedo) {
   }
 }
 
-class Metal(albedo: Vec3) extends Material(albedo) {
+class Metal(albedo: Vec3, fuzziness: Double) extends Material(albedo) {
   override def scatter(rayIn: Ray, record: HitRecord): Ray = {
     val reflected = Material.reflect(rayIn.direction.unitVector, record.normal)
-    Ray(record.p, reflected)
+    Ray(record.p, reflected + (fuzziness * Sphere.randomPointInUnitSphere()))
   }
 }
