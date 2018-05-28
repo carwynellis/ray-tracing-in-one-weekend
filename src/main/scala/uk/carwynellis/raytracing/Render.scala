@@ -2,14 +2,13 @@ package uk.carwynellis.raytracing
 
 import java.io.{File, PrintWriter}
 
+import scala.annotation.tailrec
+
 /**
   * TODO - factor out image writing to clean things up here.
   *      - proper error handling of file write errors
   */
 object Render extends App {
-
-  val nx = 1200
-  val ny = 600
 
   /**
     * Compute the color for a given ray.
@@ -41,6 +40,25 @@ object Render extends App {
 
   println(s"Rendering image to $fileName")
 
+  val nx = 1200
+  val ny = 600
+  val ns = 100
+
+  def renderPixel(x: Int, y: Int, world: HitableList): Vec3 = {
+    @tailrec
+    def loop(remaining: Int, acc: Vec3): Vec3 = {
+      if (remaining > 0) {
+        // TODO - better names for xR and yR?
+        val xR = (x.toDouble + math.random()) / nx
+        val yR = (y.toDouble + math.random()) / ny
+        val ray = Camera.getRay(xR, yR)
+        loop(remaining - 1, acc + color(ray, world))
+      }
+      else acc / ns
+    }
+    loop(ns, Vec3(0, 0, 0))
+  }
+
   // Write PPM header
   writer.write(
     s"""P3
@@ -48,11 +66,6 @@ object Render extends App {
       |$ny
       |255
       |""".stripMargin)
-
-  val lowerLeftCorner = Vec3(-2, -1, -1)
-  val horizontal      = Vec3(4, 0, 0)
-  val vertical        = Vec3(0, 2, 0)
-  val origin          = Vec3(0, 0, 0)
 
   val world = HitableList(List(
     Sphere(Vec3(0, 0, -1), 0.5),
@@ -62,15 +75,7 @@ object Render extends App {
   // Write PPM data
   (ny-1 to 0 by -1) foreach { j =>
     (0 until nx) foreach { i =>
-      val u = i.toDouble / nx
-      val v = j.toDouble / ny
-
-      val ray = Ray(
-        origin = origin,
-        direction = lowerLeftCorner + (u * horizontal) + (v * vertical)
-      )
-
-      val c = color(ray, world)
+      val c = renderPixel(i, j, world)
 
       val ir = (255.99 * c.x).toInt
       val ig = (255.99 * c.y).toInt
