@@ -26,13 +26,11 @@ class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
     val c = oc.dot(oc) - (radius * radius)
 
     val discriminant = (b * b) - (a * c)
+    val discriminantRoot = math.sqrt(discriminant)
 
-    // TODO - the C++ code seems to mutate the record that is passed in so this will probably need to change...
     if (discriminant > 0) {
-      // TODO - what is this computing?
-      val x = (-b - math.sqrt((b * b) - (a * c))) / a
-      if (x < tMin && x > tMin) {
-        // TODO - what do we do with these hit records?
+      val x = (-b - discriminantRoot) / a
+      if (x < tMax && x > tMin) {
         val record = HitRecord(
           t = x,
           p = r.pointAtParameter(x),
@@ -41,8 +39,7 @@ class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
         return HitResult(hit = true, record)
       }
 
-      // TODO - what is this computing?
-      val y = (-b + math.sqrt((b * b) - (a * c))) / a
+      val y = (-b + discriminantRoot) / a
       if (y < tMax && y > tMin) {
         val record = HitRecord(
           t = y,
@@ -64,26 +61,24 @@ object Sphere {
   def apply(centre: Vec3, radius: Double) = new Sphere(centre, radius)
 }
 
-// TODO - do we need a wrapper class like this?
 class HitableList(val hitables: List[Hitable]) extends Hitable {
 
-  // TODO - test this method...
   override def hit(r: Ray, tMin: Double, tMax: Double, hitRecord: HitRecord): HitResult = {
 
     @tailrec
     def loop(hs: List[Hitable], closest: Double, hitAnything: Boolean, record: HitRecord): HitResult = {
       hs match {
         case x :: xs =>
-          // TODO - we need the result of the hit record...
           val hitResult = x.hit(r, tMin, closest, record)
-          if (hitResult.hit) loop(xs, hitResult.record.t, hitAnything = true, hitResult.record)
-          else loop(xs, record.t, hitAnything = hitAnything, record)
+          if (hitResult.hit)
+            loop(xs, hitResult.record.t, hitAnything = true, hitResult.record)
+          else loop(xs, closest, hitAnything = hitAnything, record)
 
         case Nil => HitResult(hitAnything, record)
       }
     }
 
-    loop(hitables, 0.0, hitAnything = false, hitRecord)
+    loop(hitables, closest = tMax, hitAnything = false, hitRecord)
   }
 
 }

@@ -17,13 +17,17 @@ object Render extends App {
     * @param r
     * @return
     */
-  def color(r: Ray): Vec3 = {
-    val result = hitSphere(Vec3(0, 0, -1), 0.5, r)
+  def color(r: Ray, world: Hitable): Vec3 = {
+    // TODO - do we need to pass in a HitRecord?
+    val hitResult = world.hit(r, 0.0, Double.MaxValue, HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
 
-    // Ray intersects sphere so compute shading...
-    if (result > 0) {
-      val normal = (r.pointAtParameter(result) - Vec3(0, 0, -1)).unitVector
-      0.5 * Vec3(normal.x + 1, normal.y + 1, normal.z + 1)
+    // Ray has hit a hitable object...
+    if (hitResult.hit) {
+      0.5 * Vec3(
+        x = hitResult.record.normal.x + 1,
+        y = hitResult.record.normal.y + 1,
+        z = hitResult.record.normal.z + 1
+      )
     }
     // ...otherwise continue to render background.
     else {
@@ -31,19 +35,6 @@ object Render extends App {
       val t = 0.5 * (unitDirection.y + 1)
       ((1.0 - t) * Vec3(1, 1, 1)) + (t * Vec3(0.5, 0.7, 1))
     }
-  }
-
-  def hitSphere(centre: Vec3, radius: Double, ray: Ray): Double = {
-    val oc = ray.origin - centre
-
-    val a = ray.direction.dot(ray.direction)
-    val b = 2.0 * oc.dot(ray.direction)
-    val c = oc.dot(oc) - (radius * radius)
-
-    val discriminant = (b * b) - (4 * a * c)
-
-    if (discriminant < 0) -1
-    else (-b - math.sqrt(discriminant)) / (2 * a)
   }
 
   val fileName = "image.ppm"
@@ -64,16 +55,23 @@ object Render extends App {
   val vertical        = Vec3(0, 2, 0)
   val origin          = Vec3(0, 0, 0)
 
+  val world = HitableList(List(
+    Sphere(Vec3(0, 0, -1), 0.5),
+    Sphere(Vec3(0, -100.5, -1), 100)
+  ))
+
   // Write PPM data
   (ny-1 to 0 by -1) foreach { j =>
     (0 until nx) foreach { i =>
       val u = i.toDouble / nx
       val v = j.toDouble / ny
+
       val ray = Ray(
         origin = origin,
         direction = lowerLeftCorner + (u * horizontal) + (v * vertical)
       )
-      val c = color(ray)
+
+      val c = color(ray, world)
 
       val ir = (255.99 * c.x).toInt
       val ig = (255.99 * c.y).toInt
