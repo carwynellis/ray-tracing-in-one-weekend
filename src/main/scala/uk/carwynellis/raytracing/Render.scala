@@ -8,8 +8,8 @@ import java.io.{File, PrintWriter}
   */
 object Render extends App {
 
-  val nx = 800
-  val ny = 400
+  val nx = 1200
+  val ny = 600
 
   /**
     * Compute the color for a given ray.
