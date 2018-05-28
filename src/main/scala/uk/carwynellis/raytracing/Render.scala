@@ -22,11 +22,8 @@ object Render extends App {
 
     hitResult match {
       case Some(hit) =>
-        0.5 * Vec3(
-          x = hit.normal.x + 1,
-          y = hit.normal.y + 1,
-          z = hit.normal.z + 1
-        )
+        val target = hit.p + hit.normal + Sphere.randomPointInUnitSphere()
+        0.5 * color(Ray(hit.p, target - hit.p), world)
       case None =>
         val unitDirection = r.direction.unitVector
         val t = 0.5 * (unitDirection.y + 1)
@@ -75,11 +72,19 @@ object Render extends App {
   // Write PPM data
   (ny-1 to 0 by -1) foreach { j =>
     (0 until nx) foreach { i =>
+
       val c = renderPixel(i, j, world)
 
-      val ir = (255.99 * c.x).toInt
-      val ig = (255.99 * c.y).toInt
-      val ib = (255.99 * c.z).toInt
+      // Gamma correct the current pixel using gamma2 e.g. sqrt of each component.
+      val gammaCorrected = Vec3(
+        x = math.sqrt(c.x),
+        y = math.sqrt(c.y),
+        z = math.sqrt(c.z)
+      )
+
+      val ir = (255.99 * gammaCorrected.x).toInt
+      val ig = (255.99 * gammaCorrected.y).toInt
+      val ib = (255.99 * gammaCorrected.z).toInt
 
       writer.write(s"$ir $ig $ib\n")
     }

@@ -56,6 +56,17 @@ class Sphere(val centre: Vec3, val radius: Double) extends Hitable {
 
 object Sphere {
   def apply(centre: Vec3, radius: Double) = new Sphere(centre, radius)
+
+  @tailrec
+  def randomPointInUnitSphere(): Vec3 = {
+    val randomPoint = 2.0 * Vec3(
+      x = math.random(),
+      y = math.random(),
+      z = math.random()
+    )
+    if (randomPoint.squaredLength >= 1) randomPointInUnitSphere()
+    else randomPoint
+  }
 }
 
 class HitableList(val hitables: List[Hitable]) extends Hitable {
