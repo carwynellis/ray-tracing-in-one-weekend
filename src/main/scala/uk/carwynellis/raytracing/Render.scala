@@ -48,7 +48,7 @@ object Render extends App {
   val ny = 600
   val ns = 100
 
-  val camera = Camera(90, nx.toDouble / ny.toDouble)
+  val camera = Camera(Vec3(-2, 2, 1), Vec3(0, 0, -1), Vec3(0, 1, 0), 90, nx.toDouble / ny.toDouble)
 
   def renderPixel(x: Int, y: Int, world: HitableList): Vec3 = {
     @tailrec
@@ -73,11 +73,11 @@ object Render extends App {
       |255
       |""".stripMargin)
 
-  val r = math.cos(math.Pi / 4)
-
   val world = HitableList(List(
-    Sphere(Vec3(-r, 0, -1), r, new Lambertian(Vec3(0, 0, 1))),
-    Sphere(Vec3( r, 0, -1), r, new Lambertian(Vec3(1, 0, 0))),
+    Sphere(Vec3(0, 0, -1), 0.5, new Lambertian(Vec3(0.8, 0.3, 0.3))),
+    Sphere(Vec3(0, -100.5, -1), 100, new Lambertian(Vec3(0.8, 0.8, 0.0))),
+    Sphere(Vec3(1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.6, 0.2), 0.3)),
+    Sphere(Vec3(-1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.8, 0.8), 1.0))
   ))
 
   // Write PPM data
