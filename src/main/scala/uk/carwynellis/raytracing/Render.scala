@@ -48,6 +48,8 @@ object Render extends App {
   val ny = 600
   val ns = 100
 
+  val camera = Camera(90, nx.toDouble / ny.toDouble)
+
   def renderPixel(x: Int, y: Int, world: HitableList): Vec3 = {
     @tailrec
     def loop(remaining: Int, acc: Vec3): Vec3 = {
@@ -55,7 +57,7 @@ object Render extends App {
         // TODO - better names for xR and yR?
         val xR = (x.toDouble + math.random()) / nx
         val yR = (y.toDouble + math.random()) / ny
-        val ray = Camera.getRay(xR, yR)
+        val ray = camera.getRay(xR, yR)
         loop(remaining - 1, acc + color(ray, world, 0))
       }
       else acc / ns
@@ -71,11 +73,11 @@ object Render extends App {
       |255
       |""".stripMargin)
 
+  val r = math.cos(math.Pi / 4)
+
   val world = HitableList(List(
-    Sphere(Vec3(0, 0, -1), 0.5, new Lambertian(Vec3(0.1, 0.2, 0.5))),
-    Sphere(Vec3(0, -100.5, -1), 100, new Lambertian(Vec3(0.8, 0.8, 0.0))),
-    Sphere(Vec3(1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.6, 0.2), 0.3)),
-    Sphere(Vec3(-1, 0, -1), 0.5, new Dielectric(1.5))
+    Sphere(Vec3(-r, 0, -1), r, new Lambertian(Vec3(0, 0, 1))),
+    Sphere(Vec3( r, 0, -1), r, new Lambertian(Vec3(1, 0, 0))),
   ))
 
   // Write PPM data
@@ -83,7 +85,7 @@ object Render extends App {
 
     // Basic progress indication per iamge scanline.
     val percentComplete = 100 - ((j.toDouble / ny) * 100)
-    printf("\r% 3d%s complete", percentComplete.toInt, "%")
+    printf("\r% 4d%s complete", percentComplete.toInt, "%")
 
     (0 until nx) foreach { i =>
 
