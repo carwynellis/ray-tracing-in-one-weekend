@@ -59,6 +59,6 @@ class Dielectric(refractiveIndex: Double) extends Material(Vec3(1,1,1)) {
   private def schlick(cosine: Double): Double = {
     val r0 = (1 - refractiveIndex) / (1 + refractiveIndex)
     val r0Squared = r0 * r0
-    r0 + (1 - r0) * math.pow((1 - cosine), 5)
+    r0Squared + (1 - r0Squared) * math.pow(1 - cosine, 5)
   }
 }

@@ -80,6 +80,11 @@ object Render extends App {
 
   // Write PPM data
   (ny-1 to 0 by -1) foreach { j =>
+
+    // Basic progress indication per iamge scanline.
+    val percentComplete = 100 - ((j.toDouble / ny) * 100)
+    printf("\r% 3d%s complete", percentComplete.toInt, "%")
+
     (0 until nx) foreach { i =>
 
       val c = renderPixel(i, j, world)
@@ -101,5 +106,5 @@ object Render extends App {
 
   writer.close()
 
-  println("Finished")
+  println("\nFinished")
 }

@@ -4,9 +4,13 @@ import org.scalatest.{FunSuite, Matchers}
 
 class HitableListTest extends FunSuite with Matchers {
 
+  class DummyMaterial() extends Material(Vec3(1,1,1)) {
+    override def scatter(rayIn: Ray, record: HitRecord): Ray = ???
+  }
+
   case class DummyHitable(hit: Boolean) extends Hitable {
     override def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord] =
-      if (hit) Some(HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0)))
+      if (hit) Some(HitRecord(0.0, Vec3(0,0,0), Vec3(0,0,0), new DummyMaterial()))
       else None
   }
 
