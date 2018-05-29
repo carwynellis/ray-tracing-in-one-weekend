@@ -48,7 +48,18 @@ object Render extends App {
   val ny = 600
   val ns = 100
 
-  val camera = Camera(Vec3(-2, 2, 1), Vec3(0, 0, -1), Vec3(0, 1, 0), 90, nx.toDouble / ny.toDouble)
+  val origin = Vec3(-2, 2, 1)
+  val target = Vec3(0, 0, -1)
+
+  val camera = Camera(
+    origin = origin,
+    target = target,
+    upVector = Vec3(0, 1, 0),
+    verticalFieldOfView = 20,
+    aspectRatio =  nx.toDouble / ny.toDouble,
+    aperture = 2.0,
+    focusDistance = (origin - target).length
+  )
 
   def renderPixel(x: Int, y: Int, world: HitableList): Vec3 = {
     @tailrec
@@ -74,10 +85,10 @@ object Render extends App {
       |""".stripMargin)
 
   val world = HitableList(List(
-    Sphere(Vec3(0, 0, -1), 0.5, new Lambertian(Vec3(0.8, 0.3, 0.3))),
+    Sphere(Vec3(0, 0, -1), 0.5, new Lambertian(Vec3(0.0, 0.0, 0.2))),
     Sphere(Vec3(0, -100.5, -1), 100, new Lambertian(Vec3(0.8, 0.8, 0.0))),
     Sphere(Vec3(1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.6, 0.2), 0.3)),
-    Sphere(Vec3(-1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.8, 0.8), 1.0))
+    Sphere(Vec3(-1, 0, -1), 0.5, new Dielectric(1.5))
   ))
 
   // Write PPM data
