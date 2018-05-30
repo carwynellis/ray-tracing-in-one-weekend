@@ -19,11 +19,19 @@ class Lambertian(albedo: Vec3) extends Material(albedo) {
   }
 }
 
+object Lambertian {
+  def apply(albedo: Vec3) = new Lambertian(albedo)
+}
+
 class Metal(albedo: Vec3, fuzziness: Double) extends Material(albedo) {
   override def scatter(rayIn: Ray, record: HitRecord): Ray = {
     val reflected = Material.reflect(rayIn.direction.unitVector, record.normal)
     Ray(record.p, reflected + (fuzziness * Sphere.randomPointInUnitSphere()))
   }
+}
+
+object Metal {
+  def apply(albedo: Vec3, fuzziness: Double) = new Metal(albedo, fuzziness)
 }
 
 class Dielectric(refractiveIndex: Double) extends Material(Vec3(1,1,1)) {
@@ -61,4 +69,8 @@ class Dielectric(refractiveIndex: Double) extends Material(Vec3(1,1,1)) {
     val r0Squared = r0 * r0
     r0Squared + (1 - r0Squared) * math.pow(1 - cosine, 5)
   }
+}
+
+object Dielectric {
+  def apply(refractiveIndex: Double) = new Dielectric(refractiveIndex)
 }
