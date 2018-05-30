@@ -76,12 +76,18 @@ object Render extends App {
     loop(ns, Vec3(0, 0, 0))
   }
 
-  def randomScene(): HitableList = {
+  def generateRandomScene(): HitableList = {
+
+    val lowerBound = -12
+    val upperBound = 12
+
+    val range = lowerBound until upperBound
 
     // TODO - refactor - this is a rough port of the C++ code
-    def generateSpheres: List[Sphere] = (-11 until 11).flatMap { a =>
-      (-11 until 11).flatMap { b =>
+    def generateSpheres: List[Sphere] = range.flatMap { a =>
+      range.flatMap { b =>
         val materialSelector = math.random()
+
         val centre = Vec3(
           x = a + 0.9 * math.random(),
           y = 0.2,
@@ -132,7 +138,7 @@ object Render extends App {
       |255
       |""".stripMargin)
 
-  val world = randomScene()
+  val world = generateRandomScene()
 
   // Write PPM data
   (ny-1 to 0 by -1) foreach { j =>
