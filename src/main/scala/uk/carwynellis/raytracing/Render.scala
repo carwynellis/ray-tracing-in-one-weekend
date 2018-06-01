@@ -61,11 +61,12 @@ object Render extends App {
     focusDistance = 10
   )
 
+  // Iteratively render a given pixel for the configured number of samples.
+  // A higher sample count will result in a higher quality image at the cost of longer render times.
   def renderPixel(x: Int, y: Int, world: HitableList): Vec3 = {
     @tailrec
     def loop(remaining: Int, acc: Vec3): Vec3 = {
       if (remaining > 0) {
-        // TODO - better names for xR and yR?
         val xR = (x.toDouble + math.random()) / nx
         val yR = (y.toDouble + math.random()) / ny
         val ray = camera.getRay(xR, yR)

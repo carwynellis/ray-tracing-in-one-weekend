@@ -5,7 +5,7 @@ import java.io.{File, PrintWriter}
 /**
   * Simple image writer that outputs PPM files.
   *
-  * TODO - make sure that the writer is closed on error.
+  * Note that this writer doesn't take care of error handling which is probably good enough here for now.
   *
   * @param width
   * @param height
