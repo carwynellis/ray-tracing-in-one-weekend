@@ -27,7 +27,7 @@ class ImageWriter(width: Int, height: Int, filename: String) {
     w
   }
 
-  def writePixel(r: Int, g: Int, b: Int): Unit = writer.write(s"$r $g $b\n")
+  def writePixel(p: Pixel): Unit = writer.write(s"${p.r} ${p.g} ${p.b}\n")
 
   def close() = writer.close()
 }

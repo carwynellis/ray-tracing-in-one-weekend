@@ -2,12 +2,6 @@ package uk.carwynellis.raytracing
 
 import java.io.{File, PrintWriter}
 
-import scala.annotation.tailrec
-
-/**
-  * TODO - factor out image writing to clean things up here.
-  *      - proper error handling of file write errors
-  */
 object Render extends App {
 
   // When rendering some rays may may include a floating point error preventing them from being treated as 0.
@@ -46,7 +40,7 @@ object Render extends App {
 
   val nx = 1200
   val ny = 800
-  val ns = 1
+  val ns = 100
 
   val origin = Vec3(13, 2, 3)
   val target = Vec3(0, 0, 0)
@@ -58,7 +52,7 @@ object Render extends App {
     verticalFieldOfView = 20,
     aspectRatio =  nx.toDouble / ny.toDouble,
     aperture = 0.1,
-    focusDistance = 10
+    focusDistance = 1
   )
 
   /**
@@ -76,7 +70,7 @@ object Render extends App {
       val yR = (y.toDouble + math.random()) / ny
       val ray = camera.getRay(xR, yR)
       color(ray, world, 0)
-    }.reduce(_ + _)
+    }.reduce(_ + _) / ns
 
   val world = Scene.randomScene()
 
@@ -89,31 +83,32 @@ object Render extends App {
     printf("\r% 4d%s complete", percentComplete.toInt, "%")
 
     (0 until nx) map { i =>
-
-      val c = renderPixel(i, j, world)
-
-      // Gamma correct the current pixel using gamma2 e.g. sqrt of each component.
-      val gammaCorrected = Vec3(
-        x = math.sqrt(c.x),
-        y = math.sqrt(c.y),
-        z = math.sqrt(c.z)
-      )
-
-      // TODO - introduce a pixel class
-      (
-        (255.99 * gammaCorrected.x).toInt,
-        (255.99 * gammaCorrected.y).toInt,
-        (255.99 * gammaCorrected.z).toInt
-      )
-
+      renderPixel(i, j, world).toPixel
     }
   }
 
-  image.flatten.foreach {
-    case (r,g,b) => imageWriter.writePixel(r, g, b)
-  }
+  image.flatten.foreach(imageWriter.writePixel)
 
   imageWriter.close()
 
   println("\nFinished")
+}
+
+class Pixel(val r: Int, val g: Int, val b: Int)
+
+object Pixel {
+  def fromVec3(v: Vec3): Pixel = {
+    // Gamma correct the current pixel using gamma2 e.g. sqrt of each component.
+    val gammaCorrected = Vec3(
+      x = math.sqrt(v.x),
+      y = math.sqrt(v.y),
+      z = math.sqrt(v.z)
+    )
+
+    new Pixel(
+      r = (255.99 * gammaCorrected.x).toInt,
+      g = (255.99 * gammaCorrected.y).toInt,
+      b = (255.99 * gammaCorrected.z).toInt
+    )
+  }
 }

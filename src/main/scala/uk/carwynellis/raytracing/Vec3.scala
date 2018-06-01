@@ -92,15 +92,16 @@ case class Vec3(x: Double, y: Double, z: Double) {
     y = -((this.x * that.z) - (this.z * that.x)),
     z = (this.x * that.y) - (this.y * that.x)
   )
-
-  // TODO - += +* etc... methods have not been implemented.
-
 }
 
 object Vec3 {
 
-  implicit class DoubleWithVec3Operators(d: Double) {
+  implicit class DoubleWithVec3Ops(d: Double) {
     def *(v: Vec3): Vec3 = v * d
+  }
+
+  implicit class Vec3ToPixelOps(v: Vec3) {
+    def toPixel = Pixel.fromVec3(v)
   }
 
 }
