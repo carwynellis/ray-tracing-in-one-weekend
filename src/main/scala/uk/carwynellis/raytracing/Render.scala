@@ -46,7 +46,7 @@ object Render extends App {
 
   val nx = 1200
   val ny = 800
-  val ns = 100
+  val ns = 1
 
   val origin = Vec3(13, 2, 3)
   val target = Vec3(0, 0, 0)
@@ -61,34 +61,34 @@ object Render extends App {
     focusDistance = 10
   )
 
-  // Iteratively render a given pixel for the configured number of samples.
-  // A higher sample count will result in a higher quality image at the cost of longer render times.
-  def renderPixel(x: Int, y: Int, world: HitableList): Vec3 = {
-    @tailrec
-    def loop(remaining: Int, acc: Vec3): Vec3 = {
-      if (remaining > 0) {
-        val xR = (x.toDouble + math.random()) / nx
-        val yR = (y.toDouble + math.random()) / ny
-        val ray = camera.getRay(xR, yR)
-        loop(remaining - 1, acc + color(ray, world, 0))
-      }
-      else acc / ns
-    }
-    loop(ns, Vec3(0, 0, 0))
-  }
+  /**
+    * Sample a number of randomly generated rays for the current pixel.
+    *
+    * Higher sample counts yield a better quality image at the expense of longer render times.
+    * @param x
+    * @param y
+    * @param world
+    * @return
+    */
+  def renderPixel(x: Int, y: Int, world: HitableList): Vec3 =
+    (0 until ns).map { _ =>
+      val xR = (x.toDouble + math.random()) / nx
+      val yR = (y.toDouble + math.random()) / ny
+      val ray = camera.getRay(xR, yR)
+      color(ray, world, 0)
+    }.reduce(_ + _)
 
   val world = Scene.randomScene()
 
   val imageWriter = ImageWriter(nx, ny, "image.ppm")
 
   // Write PPM data
-  (ny-1 to 0 by -1) foreach { j =>
-
-    // Basic progress indication per iamge scanline.
+  val image = (ny-1 to 0 by -1) map { j =>
+    // Basic progress indication per image scanline.
     val percentComplete = 100 - ((j.toDouble / ny) * 100)
     printf("\r% 4d%s complete", percentComplete.toInt, "%")
 
-    (0 until nx) foreach { i =>
+    (0 until nx) map { i =>
 
       val c = renderPixel(i, j, world)
 
@@ -99,13 +99,18 @@ object Render extends App {
         z = math.sqrt(c.z)
       )
 
-      imageWriter.writePixel(
-        r = (255.99 * gammaCorrected.x).toInt,
-        g = (255.99 * gammaCorrected.y).toInt,
-        b = (255.99 * gammaCorrected.z).toInt
+      // TODO - introduce a pixel class
+      (
+        (255.99 * gammaCorrected.x).toInt,
+        (255.99 * gammaCorrected.y).toInt,
+        (255.99 * gammaCorrected.z).toInt
       )
 
     }
+  }
+
+  image.flatten.foreach {
+    case (r,g,b) => imageWriter.writePixel(r, g, b)
   }
 
   imageWriter.close()
