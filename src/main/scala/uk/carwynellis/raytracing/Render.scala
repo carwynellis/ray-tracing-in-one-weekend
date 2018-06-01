@@ -76,15 +76,9 @@ object Render extends App {
     loop(ns, Vec3(0, 0, 0))
   }
 
-  // Write PPM header
-  writer.write(
-    s"""P3
-      |$nx
-      |$ny
-      |255
-      |""".stripMargin)
-
   val world = Scene.randomScene()
+
+  val imageWriter = ImageWriter(nx, ny, "image.ppm")
 
   // Write PPM data
   (ny-1 to 0 by -1) foreach { j =>
@@ -104,15 +98,16 @@ object Render extends App {
         z = math.sqrt(c.z)
       )
 
-      val ir = (255.99 * gammaCorrected.x).toInt
-      val ig = (255.99 * gammaCorrected.y).toInt
-      val ib = (255.99 * gammaCorrected.z).toInt
+      imageWriter.writePixel(
+        r = (255.99 * gammaCorrected.x).toInt,
+        g = (255.99 * gammaCorrected.y).toInt,
+        b = (255.99 * gammaCorrected.z).toInt
+      )
 
-      writer.write(s"$ir $ig $ib\n")
     }
   }
 
-  writer.close()
+  imageWriter.close()
 
   println("\nFinished")
 }
