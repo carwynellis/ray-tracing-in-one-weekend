@@ -56,10 +56,10 @@ class Renderer(camera: Camera, scene: Hitable, width: Int, height: Int, samples:
     *
     * @return
     */
-  def renderScene(): List[Pixel] = (height-1 to 0 by -1).flatMap { j: Int =>
+  def renderScene(): Seq[Pixel] = (height-1 to 0 by -1).flatMap { j: Int =>
     showProgress(j)
     (0 until width).map(renderPixel(_, j))
-  }.toList
+  }
 
   // Basic progress indication, updated for each horizontal line of the image.
   private def showProgress(hPos: Int): Unit = {

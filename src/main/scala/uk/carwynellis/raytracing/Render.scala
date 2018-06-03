@@ -4,7 +4,7 @@ object Render extends App {
 
   val width = 1200
   val height = 800
-  val samples = 1
+  val samples = 100
 
   val origin = Vec3(13, 2, 3)
   val target = Vec3(0, 0, 0)
