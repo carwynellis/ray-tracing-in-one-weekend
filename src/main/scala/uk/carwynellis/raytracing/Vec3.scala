@@ -12,9 +12,9 @@ package uk.carwynellis.raytracing
 case class Vec3(x: Double, y: Double, z: Double) {
 
   // Alias the x, y, z values.
-  val r: Double = x
-  val g: Double = y
-  val b: Double = z
+  def r: Double = x
+  def g: Double = y
+  def b: Double = z
 
   // TODO - some operators including array indexing operators not yet implemented.
   def unary_-(): Vec3 = Vec3( -x, -y, -z)
