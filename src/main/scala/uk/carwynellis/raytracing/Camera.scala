@@ -53,7 +53,7 @@ class Camera(origin: Vec3,
     }
 
     val rd = lensRadius * randomPointInUnitDisk()
-    val offset = u * rd.x * rd.y
+    val offset = (u * rd.x) + (v * rd.y)
 
     Ray(
       origin = origin + offset,
